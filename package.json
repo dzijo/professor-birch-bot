@@ -1,0 +1,13 @@
+{
+    "name": "professor-birch",
+    "version": "1.0.0",
+    "description": "Discord bot for drafting Pokemon",
+    "main": "bot.js",
+    "author": "dzijo",
+    "dependencies": {
+        "discord.io": "https://github.com/woor/discord.io/tarball/gateway_v6",
+        "fs-extra": "^8.1.0",
+        "mysql": "^2.17.1",
+        "winston": "^3.2.1"
+    }
+}
