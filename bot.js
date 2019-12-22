@@ -54,6 +54,16 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                 clearing = false;
                 functions.enroll(bot, con, user, userID, channelID, message, evt);
                 break;
+            // show stats
+            case 'stats':
+                clearing = false;
+                functions.standings(bot, con, channelID);
+                break;
+
+
+
+
+
             // clear all participants
             case 'clearall':
                 if (auth.mods.includes(userID)) {

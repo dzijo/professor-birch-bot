@@ -43,5 +43,23 @@ module.exports = {
                 }
             }
         });
+    },
+
+    standings: function (bot, con, channelID) {
+        var sql = `SELECT userName, wins, losses, PF, PA FROM players ORDER BY wins DESC, PF - PA DESC`;
+        con.query(sql, function (err, results, fields) {
+            if (err) throw err;
+            else {
+                console.log(results);
+                var stats = "Name: W-L | PF-PA-PD";
+                for (r of results) {
+                    stats += `\n${r.userName}: ${r.wins}-${r.losses} | ${r.PF}-${r.PA}-${r.PF - r.PA}`;
+                }
+                bot.sendMessage({
+                    to: channelID,
+                    message: stats
+                });
+            }
+        })
     }
 }
