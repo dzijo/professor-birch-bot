@@ -2,6 +2,7 @@ var Discord = require('discord.io');
 var logger = require('winston');
 var auth = require('./auth.json');
 var mysql = require('mysql');
+var functions = require('./functions');
 
 
 // Configure logger settings
@@ -34,6 +35,7 @@ var clearing = false;
 bot.on('message', function (user, userID, channelID, message, evt) {
     // Bot will listen for messages that will start with `!`
     if (message.substring(0, 1) == '!') {
+        functions.log(con, user, userID, channelID, message, evt);
         var args = message.substring(1).split(' ');
         var cmd = args[0];
 
@@ -50,34 +52,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
             // adding a player
             case 'enroll':
                 clearing = false;
-                //check if user has already enrolled
-                con.query(`SELECT * FROM test;`, function (err, results, fields) {
-                    if (err) {
-                        throw err;
-                        //add the user
-                        //, (err) => {
-                        /*if (err) {
-                            bot.sendMessage({
-                                to: channelID,
-                                message: "There was an issue, try again."
-                            })
-                        }
-                        else {
-                            bot.sendMessage({
-                                to: channelID,
-                                message: `Congrats, ${user}, you have successfully enrolled in the Pokémon draft tournament.`
-                            })
-                        }*/
-                    }
-                    else {
-                        //already enrolled
-                        bot.sendMessage({
-                            to: channelID,
-                            message: `F`
-                        });
-                        console.log(`F: ${results[0].name}`);
-                    }
-                });
+                functions.enroll(bot, con, user, userID, channelID, message, evt);
                 break;
             // clear all participants
             case 'clearall':
