@@ -1,8 +1,6 @@
 var Discord = require('discord.io');
 var logger = require('winston');
 var auth = require('./auth.json');
-/*var fs = require('fs');
-var fsExtra = require('fs-extra');*/
 var mysql = require('mysql');
 
 
@@ -30,13 +28,11 @@ bot.on('ready', function (evt) {
         password: auth.password,
         database: auth.database
     });
-    //con.connect();
 });
 
 var clearing = false;
 bot.on('message', function (user, userID, channelID, message, evt) {
-    // Our bot needs to know if it will execute a command
-    // It will listen for messages that will start with `!`
+    // Bot will listen for messages that will start with `!`
     if (message.substring(0, 1) == '!') {
         var args = message.substring(1).split(' ');
         var cmd = args[0];
@@ -54,11 +50,12 @@ bot.on('message', function (user, userID, channelID, message, evt) {
             // adding a player
             case 'enroll':
                 clearing = false;
-                //fs.readFile(folder + userID + ".txt", (err, data) => {
+                //check if user has already enrolled
                 con.query(`SELECT * FROM test;`, function (err, results, fields) {
                     if (err) {
                         throw err;
-                        //fs.writeFile(folder + userID + ".txt", "", (err) => {
+                        //add the user
+                        //, (err) => {
                         /*if (err) {
                             bot.sendMessage({
                                 to: channelID,
@@ -73,6 +70,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                         }*/
                     }
                     else {
+                        //already enrolled
                         bot.sendMessage({
                             to: channelID,
                             message: `F`
@@ -94,7 +92,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
             // confirm clear
             case 'yes':
                 if (clearing === true && auth.mods.includes(userID)) {
-                    //fsExtra.emptyDirSync('players')
+                    //clear
                     clearing = false;
                     bot.sendMessage({
                         to: channelID,
