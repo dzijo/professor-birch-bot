@@ -95,10 +95,22 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                     });
                 }
                 break;
+
+
+
+
             // roll a pokemon
             case 'roll':
                 clearing = false;
+                if (auth.mods.includes(userID)) {
+                    functions.firstPokemon(bot, con);
+                }
                 break;
+
+
+
+
+
             // add result
             case 'result':
                 clearing = false;
