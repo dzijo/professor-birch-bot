@@ -1,8 +1,8 @@
-var Discord = require('discord.io');
-var logger = require('winston');
-var auth = require('./auth.json');
-var mysql = require('mysql');
-var functions = require('./functions');
+const Discord = require('discord.io');
+const logger = require('winston');
+const mysql = require('mysql');
+const functions = require('./functions.js');
+const config = require('./config.js')
 
 
 // Configure logger settings
@@ -12,32 +12,32 @@ logger.add(new logger.transports.Console, {
 });
 logger.level = 'debug';
 // Initialize Discord Bot
-var bot = new Discord.Client({
-    token: auth.token,
+let bot = new Discord.Client({
+    token: config.token,
     autorun: true
 });
-var con;
+let con;
 
 
 bot.on('ready', function (evt) {
     logger.info('Connected');
     logger.info('Logged in as: ');
     logger.info(bot.username + ' - (' + bot.id + ')');
-    con = mysql.createConnection({
-        host: auth.host,
-        user: auth.username,
-        password: auth.password,
-        database: auth.database
+    con = mysql.createPool({
+        host: config.host,
+        user: config.username,
+        password: config.password,
+        database: config.database
     });
 });
 
-var clearing = false;
+let clearing = false;
 bot.on('message', function (user, userID, channelID, message, evt) {
     // Bot will listen for messages that will start with `!`
     if (message.substring(0, 1) == '!') {
         functions.log(con, user, userID, channelID, message, evt);
-        var args = message.substring(1).split(' ');
-        var cmd = args[0];
+        let args = message.substring(1).split(' ');
+        let cmd = args[0];
 
         args = args.splice(1);
         switch (cmd) {
@@ -66,7 +66,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
 
             // clear all participants
             case 'clearall':
-                if (auth.mods.includes(userID)) {
+                if (config.mods.includes(userID)) {
                     bot.sendMessage({
                         to: channelID,
                         message: `Are you sure you want to clear all participants? Type !yes to confirm, !no to cancel.`
@@ -76,7 +76,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                 break;
             // confirm clear
             case 'yes':
-                if (clearing === true && auth.mods.includes(userID)) {
+                if (clearing === true && config.mods.includes(userID)) {
                     //clear
                     clearing = false;
                     bot.sendMessage({
@@ -87,7 +87,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                 break;
             // cancel clear
             case 'no':
-                if (clearing === true && auth.mods.includes(userID)) {
+                if (clearing === true && config.mods.includes(userID)) {
                     clearing = false;
                     bot.sendMessage({
                         to: channelID,
@@ -102,7 +102,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
             // roll a pokemon
             case 'roll':
                 clearing = false;
-                if (auth.mods.includes(userID)) {
+                if (config.mods.includes(userID)) {
                     functions.firstPokemon(bot, con);
                 }
                 break;

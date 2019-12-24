@@ -3,10 +3,10 @@ const moment = require('moment');
 module.exports = {
     log: function (con, user, userID, channelID, message, evt) {
         //console.log(evt.d.timestamp);
-        //var date = new Date(evt.d.timestamp).toISOString().slice(0, 19).replace('T', ' ');
-        var date = moment(evt.d.timestamp).format('YYYY-MM-DD HH:mm:ss');
+        //let date = new Date(evt.d.timestamp).toISOString().slice(0, 19).replace('T', ' ');
+        let date = moment(evt.d.timestamp).format('YYYY-MM-DD HH:mm:ss');
         //console.log(date.toString());
-        var sql = `INSERT INTO log(stamp, command, userName, userId) VALUES ('${date}', '${message}', '${user}', '${userID}');`;
+        let sql = `INSERT INTO log(stamp, command, userName, userId) VALUES ('${date}', '${message}', '${user}', '${userID}');`;
         con.query(sql, function (err, results, fields) {
             if (err) throw err;
             else {
@@ -17,7 +17,7 @@ module.exports = {
     },
 
     enroll: function (bot, con, user, userID, channelID, message, evt) {
-        var sql = `SELECT * FROM players WHERE userId = ${userID}`;
+        let sql = `SELECT * FROM players WHERE userId = ${userID}`;
         con.query(sql, function (err, results, fields) {
             if (err) throw err;
             else {
@@ -28,7 +28,7 @@ module.exports = {
                     });
                 }
                 else {
-                    var sql = `INSERT INTO players (userId, userName) VALUES ('${userID}', '${user}');`;
+                    let sql = `INSERT INTO players (userId, userName) VALUES ('${userID}', '${user}');`;
                     con.query(sql, function (err, results, fields) {
                         if (err) {
                             bot.sendMessage({
@@ -49,12 +49,12 @@ module.exports = {
     },
 
     standings: function (bot, con, channelID) {
-        var sql = `SELECT userName, wins, losses, PF, PA FROM players ORDER BY wins DESC, PF - PA DESC`;
+        let sql = `SELECT userName, wins, losses, PF, PA FROM players ORDER BY wins DESC, PF - PA DESC`;
         con.query(sql, function (err, results, fields) {
             if (err) throw err;
             else {
                 //console.log(results);
-                var stats = "Name: W-L | PF-PA-PD";
+                let stats = "Name: W-L | PF-PA-PD";
                 for (r of results) {
                     stats += `\n${r.userName}: ${r.wins}-${r.losses} | ${r.PF}-${r.PA}-${r.PF - r.PA}`;
                 }
@@ -67,13 +67,13 @@ module.exports = {
     },
 
     firstPokemon: function (bot, con) {
-        var sql = `SELECT userId FROM players`;
-        var players;
+        let sql = `SELECT userId FROM players`;
+        let players;
         con.query(sql, function (err, results, fields) {
             if (err) throw err;
             else {
-                var players = results;
-                var sql = `SELECT pokemon FROM pokemon WHERE ownerId IS NULL`
+                let players = results;
+                let sql = `SELECT pokemon FROM pokemon WHERE ownerId IS NULL`
                 con.query(sql, function (err, results, fields) {
                     if (err) throw err;
                     else {
