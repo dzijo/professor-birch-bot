@@ -107,7 +107,18 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                 }
                 break;
 
-
+            case 'choose1':
+                clearing = false;
+                functions.choosePokemon(bot, con, user, userID, 1);
+                break;
+            case 'choose2':
+                clearing = false;
+                functions.choosePokemon(bot, con, user, userID, 2);
+                break;
+            case 'choose3':
+                clearing = false;
+                functions.choosePokemon(bot, con, user, userID, 3);
+                break;
 
 
 

@@ -78,18 +78,56 @@ module.exports = {
                     if (err) throw err;
                     else {
                         pokemon = shuffle(results);
-                        let i = 0;
-                        for (p of players) {
-                            bot.sendMessage({
-                                to: p.userId,
-                                message: `Option 1: ${pokemon[i].pokemon}\nOption 2: ${pokemon[i + 1].pokemon}\nOption 3: ${pokemon[i + 2].pokemon}`
-                            });
-                            i += 3;
-                        }
+                        let sql = `DELETE FROM choices;`
+                        con.query(sql, function (err, results, fields) {
+                            if (err) throw err;
+                            else {
+                                let i = 0;
+                                for (p of players) {
+                                    let sql = `INSERT INTO choices (userId, pokemon, choice) VALUES\n`;
+                                    let message = ``;
+                                    for (j of [1, 2, 3]) {
+                                        let mon = pokemon[i + j].pokemon
+                                        message += `Option ${j}: ${mon}\n`;
+                                        sql += `('${p.userId}', '${mon}', ${j}),\n`;
+                                    }
+                                    sql = sql.slice(0, -2) + ";";
+                                    con.query(sql, function (err, results, fields) {
+                                        if (err) throw err;
+                                    });
+                                    message += `Please answer with "!choose<number of option>" to choose a pokemon. E.g. !choose1`;
+                                    bot.sendMessage({
+                                        to: p.userId,
+                                        message: message
+                                    });
+                                    i += 3;
+                                }
+                            }
+                        });
                     }
                 });
             }
         })
+    },
+
+    choosePokemon: function (bot, con, user, userID, choice) {
+        let sql = `SELECT pokemon FROM choices WHERE userId = '${userID}' AND choice = ${choice};`;
+        con.query(sql, function (err, results, fields) {
+            if (err) throw err;
+            else {
+                let pokemon = results[0].pokemon;
+                let sql = `UPDATE pokemon SET ownerId = '${userID}' WHERE pokemon = '${pokemon}';`
+                con.query(sql, function (err, results, fields) {
+                    if (err) throw err;
+                    else {
+                        bot.sendMessage({
+                            to: userID,
+                            message: `Congrats, ${user}, you have chosen ${pokemon} to be your partner! Good luck!`
+                        });
+                    }
+                });
+            }
+        });
     }
 }
 
