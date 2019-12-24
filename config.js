@@ -9,5 +9,6 @@ module.exports = {
     mods: [
         process.env.ADMIN
     ],
-    matchweek: process.env.MATCHWEEK
+    matchweek: process.env.MATCHWEEK,
+    timezone: process.env.TIMEZONE
 }

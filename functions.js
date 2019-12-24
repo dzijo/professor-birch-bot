@@ -1,10 +1,10 @@
-const moment = require('moment');
+const moment = require('moment-timezone');
 
 module.exports = {
-    log: function (con, user, userID, channelID, message, evt) {
+    log: function (con, user, userID, channelID, message, evt, timezone) {
         //console.log(evt.d.timestamp);
         //let date = new Date(evt.d.timestamp).toISOString().slice(0, 19).replace('T', ' ');
-        let date = moment(evt.d.timestamp).format('YYYY-MM-DD HH:mm:ss');
+        let date = moment.tz(evt.d.timestamp, timezone).format('YYYY-MM-DD HH:mm:ss');
         //console.log(date.toString());
         let sql = `INSERT INTO log(stamp, command, userName, userId) VALUES ('${date}', '${message}', '${user}', '${userID}');`;
         con.query(sql, function (err, results, fields) {

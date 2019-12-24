@@ -35,7 +35,7 @@ let clearing = false;
 bot.on('message', function (user, userID, channelID, message, evt) {
     // Bot will listen for messages that will start with `!`
     if (message.substring(0, 1) == '!') {
-        functions.log(con, user, userID, channelID, message, evt);
+        functions.log(con, user, userID, channelID, message, evt, config.timezone);
         let args = message.substring(1).split(' ');
         let cmd = args[0];
 
