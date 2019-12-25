@@ -36,6 +36,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
     // Bot will listen for messages that will start with `!`
     if (message.substring(0, 1) == '!') {
         functions.log(con, user, userID, channelID, message, evt, config.timezone);
+        config.matchweek += 1;
         let args = message.substring(1).split(' ');
         let cmd = args[0];
 
@@ -60,6 +61,26 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                 functions.standings(bot, con, channelID);
                 break;
 
+            case 'result':
+                if (args[0]) {
+                    let opponent = args[0].slice(3, -1);
+                    if (opponent) {
+                        functions.addResult(bot, con, user, userID, channelID, opponent, args[1], evt, config.timezone);
+                    }
+                    else {
+                        bot.sendMessage({
+                            to: channelID,
+                            message: `Please tag your opponent, ${user}. Use !result for help.`
+                        });
+                    }
+                }
+                else {
+                    bot.sendMessage({
+                        to: channelID,
+                        message: `Correct usage of the command:\n!result @<opponent> <score1>-<score2>.\nMake sure to tag your opponent.`
+                    });
+                }
+                break;
 
 
 
