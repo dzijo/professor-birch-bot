@@ -1,4 +1,5 @@
 const moment = require('moment-timezone');
+const table = require('easy-table');
 
 module.exports = {
     log: function (con, user, userID, channelID, message, evt, timezone) {
@@ -42,36 +43,37 @@ module.exports = {
     },
 
     stats: function (bot, con, channelID) {
-        let sql = `SELECT userName, wins, losses, PF, PA FROM players ORDER BY wins DESC, PF - PA DESC`;
+        let sql = `SELECT userName, wins, losses, PF, PA, PF-PA AS PD FROM players ORDER BY wins DESC, PF - PA DESC, PF DESC`;
         con.query(sql, function (err, results, fields) {
             if (err) throw err;
-            let stats = "Name: W-L | PF-PA(PD)";
-            for (r of results) {
-                stats += `\n${r.userName}: ${r.wins}-${r.losses} | ${r.PF}-${r.PA}(${r.PF - r.PA})`;
-            }
             bot.sendMessage({
                 to: channelID,
-                message: stats
+                message: `\`\`\`${table.print(results)}\`\`\``
             });
         })
     },
 
     weeklyStats: function (bot, con, channelID) {
+        //TODO choose a week
         let sql = `SELECT * FROM matchweeks ORDER BY startTime DESC LIMIT 1;`
         con.query(sql, function (err, results, fields) {
             if (err) throw err;
-            matchweek = results.matchweek;
-            let sql = `SELECT userName, wins, losses, PF, PA FROM resultsbymatchweek WHERE matchweek = ${matchweek} ORDER BY wins DESC, PF - PA DESC`;
-            con.query(sql, function (err, results, fields) {
-                if (err) throw err;
-                let stats = `Matchweek ${matchweek}\n`;
-                stats += "Name: W-L | PF-PA(PD)";
-                for (r of results) {
-                    stats += `\n${r.userName}: ${r.wins}-${r.losses} | ${r.PF}-${r.PA}(${r.PF - r.PA})`;
-                }
+            matchweek = results[0].matchweek;
+            if (!matchweek) {
                 bot.sendMessage({
                     to: channelID,
-                    message: stats
+                    message: `There are no records.`
+                });
+                return;
+            }
+            let sql = `SELECT userName, wins, losses, PF, PA, PD FROM fullresultsbymatchweek WHERE matchweek = ${matchweek} ORDER BY wins DESC, PD DESC, PF DESC`;
+            con.query(sql, function (err, results, fields) {
+                if (err) throw err;
+                let message = `Stats for matchweek ${matchweek}:\n`;
+                message += `\`\`\`${table.print(results)}\`\`\``;
+                bot.sendMessage({
+                    to: channelID,
+                    message: message
                 });
             });
         });
