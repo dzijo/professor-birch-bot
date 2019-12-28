@@ -27,7 +27,8 @@ bot.on('ready', function (evt) {
         host: config.host,
         user: config.username,
         password: config.password,
-        database: config.database
+        database: config.database,
+        multipleStatements: true
     });
 });
 
@@ -58,10 +59,16 @@ bot.on('message', function (user, userID, channelID, message, evt) {
             // show stats
             case 'stats':
                 clearing = false;
-                functions.standings(bot, con, channelID);
+                functions.stats(bot, con, channelID);
+                break;
+
+            case 'weeklyStats':
+                clearing = false;
+                functions.weeklyStats(bot, con, channelID);
                 break;
 
             case 'result':
+                clearing = false;
                 if (args[0]) {
                     let opponent = args[0].slice(3, -1);
                     if (opponent) {
@@ -83,7 +90,27 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                 break;
 
 
-
+            case 'delete':
+                clearing = false;
+                if (config.mods.includes(userID)) {
+                    if (args[0]) {
+                        let deleteUserId = args[0].slice(3, -1);
+                        functions.removePlayer(con, bot, channelID, deleteUserId);
+                    }
+                    else {
+                        bot.sendMessage({
+                            to: channelID,
+                            message: `Tag a user you want to delete, ${user}.`
+                        });
+                    }
+                }
+                else {
+                    bot.sendMessage({
+                        to: channelID,
+                        message: `You can't do that, ${user}.`
+                    });
+                }
+                break;
 
             // clear all participants
             case 'clearall':
@@ -94,16 +121,19 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                     });
                     clearing = true;
                 }
+                else {
+                    bot.sendMessage({
+                        to: channelID,
+                        message: `You can't do that, ${user}.`
+                    });
+                }
                 break;
             // confirm clear
             case 'yes':
                 if (clearing === true && config.mods.includes(userID)) {
                     //clear
                     clearing = false;
-                    bot.sendMessage({
-                        to: channelID,
-                        message: `Deleted all participants.`
-                    });
+                    functions.clearAll(con, bot, channelID);
                 }
                 break;
             // cancel clear
@@ -124,7 +154,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
             case 'roll':
                 clearing = false;
                 if (config.mods.includes(userID)) {
-                    functions.firstPokemon(bot, con);
+                    functions.rollPokemon(bot, con, channelID, evt, config.timezone);
                 }
                 break;
 
@@ -139,13 +169,6 @@ bot.on('message', function (user, userID, channelID, message, evt) {
             case 'choose3':
                 clearing = false;
                 functions.choosePokemon(bot, con, user, userID, 3);
-                break;
-
-
-
-            // add result
-            case 'result':
-                clearing = false;
                 break;
         }
     }
