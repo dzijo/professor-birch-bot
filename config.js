@@ -9,5 +9,8 @@ module.exports = {
     mods: [
         process.env.ADMIN
     ],
+    channels: [
+        process.env.CHANNEL
+    ],
     timezone: process.env.TIMEZONE
 }

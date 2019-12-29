@@ -53,24 +53,77 @@ module.exports = {
         })
     },
 
-    weeklyStats: function (bot, con, channelID) {
-        //TODO choose a week
-        let sql = `SELECT * FROM matchweeks ORDER BY startTime DESC LIMIT 1;`
+    weeklyStats: function (bot, con, channelID, week) {
+        let sql = `SELECT * FROM matchweeks ORDER BY startTime DESC;`
         con.query(sql, function (err, results, fields) {
             if (err) throw err;
-            matchweek = results[0].matchweek;
-            if (!matchweek) {
+            let matchweek;
+            if (!results[0]) {
                 bot.sendMessage({
                     to: channelID,
                     message: `There are no records.`
                 });
                 return;
             }
+            if (week) {
+                matchweek = parseInt(week);
+                if (isNaN(matchweek)) {
+                    bot.sendMessage({
+                        to: channelID,
+                        message: `That's not a proper matchweek.`
+                    });
+                    return;
+                }
+                if (!matchweekContains(results, matchweek)) {
+                    bot.sendMessage({
+                        to: channelID,
+                        message: `You haven't gotten to that week yet.`
+                    });
+                    return;
+                }
+            }
+            else {
+                matchweek = results[0].matchweek;
+            }
             let sql = `SELECT userName, wins, losses, PF, PA, PD FROM fullresultsbymatchweek WHERE matchweek = ${matchweek} ORDER BY wins DESC, PD DESC, PF DESC`;
             con.query(sql, function (err, results, fields) {
                 if (err) throw err;
                 let message = `Stats for matchweek ${matchweek}:\n`;
                 message += `\`\`\`${table.print(results)}\`\`\``;
+                bot.sendMessage({
+                    to: channelID,
+                    message: message
+                });
+            });
+        });
+    },
+
+    playedWith: function (bot, con, user, userID, channelID) {
+        let sql = `SELECT * FROM matchweeks ORDER BY startTime DESC;`
+        con.query(sql, function (err, results, fields) {
+            if (err) throw err;
+            let matchweek;
+            if (!results[0]) {
+                bot.sendMessage({
+                    to: channelID,
+                    message: `There are no records.`
+                });
+                return;
+            }
+            matchweek = results[0].matchweek;
+            let sql = `SELECT opponent FROM fullmatchups WHERE userId = '${userID}' AND matchweek = ${matchweek};`;
+            con.query(sql, function (err, results, fields) {
+                let message;
+                if (!results[0]) {
+                    message = `You haven't played against anyone this matchweek, ${user}.`
+                }
+                else {
+                    message = `${user}, this matchweek you have played against: `;
+                    for (r of results) {
+                        message += `${r.opponent}, `;
+                    }
+                    message = message.slice(0, -2) + `.`;
+                }
                 bot.sendMessage({
                     to: channelID,
                     message: message
@@ -109,7 +162,7 @@ module.exports = {
             if (!results[1]) {
                 bot.sendMessage({
                     to: channelID,
-                    message: `You have to both be in the leauge and tag your opponent correctly if you haven't, ${user}. Use !result for help.`
+                    message: `You have to both be in the league and tag your opponent correctly if you haven't, ${user}. Use !result for help.`
                 });
                 return;
             }
@@ -215,30 +268,17 @@ module.exports = {
             INSERT INTO matchweeks (matchweek, startTime) VALUES (${matchweek}, '${date}');`;
             con.query(sql, function (err, results, fields) {
                 if (err) throw err;
-                pokemon = shuffle(results[0]);
+                let pokemon = shuffle(results[0]);
                 if (matchweek === 1) {
                     setAllChoices(players, 3);
-                    giveChoices(players, con, bot);
-                    /*let i = 0;
-                    for (p of players) {
-                        p.numberOfChoices = 3;
-                        let [sql, message] = givePokemon(i, pokemon, p);
-                        bot.sendMessage({
-                            to: p.userId,
-                            message: message
-                        });
-                        i += p.numberOfChoices;
-                        con.query(sql, function (err, results, fields) {
-                            if (err) throw err;
-                        });
-                    }*/
+                    giveChoices(players, con, bot, pokemon);
                     return;
                 }
                 let sql = `SELECT userId, wins, losses, PF-PA AS PD, PF, PA FROM resultsbymatchweek WHERE matchweek = ${matchweek - 1} ORDER BY wins DESC, PF-PA DESC, PF DESC;`
                 con.query(sql, function (err, results, fields) {
                     if (err) throw err;
                     setChoices(players, results);
-                    giveChoices(players, con, bot);
+                    giveChoices(players, con, bot, pokemon);
                     return;
                 })
 
@@ -339,6 +379,7 @@ function setChoices(players, results) {
         else {
             p.numberOfChoices = 2;
         }
+        i++;
     }
     return;
 }
@@ -350,7 +391,7 @@ function checkIfTie(checkee, second) {
     return false;
 }
 
-function giveChoices(players, con, bot) {
+function giveChoices(players, con, bot, pokemon) {
     let i = 0;
     for (p of players) {
         let [sql, message] = givePokemon(i, pokemon, p);
@@ -370,4 +411,13 @@ function setAllChoices(players, numberOfChoices) {
     for (p of players) {
         p.numberOfChoices = numberOfChoices;
     }
+}
+
+function matchweekContains(results, value) {
+    for (r of results) {
+        if (r.matchweek === value) {
+            return true;
+        }
+    }
+    return false;
 }

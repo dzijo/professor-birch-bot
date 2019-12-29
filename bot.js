@@ -2,7 +2,8 @@ const Discord = require('discord.io');
 const logger = require('winston');
 const mysql = require('mysql');
 const functions = require('./functions.js');
-const config = require('./config.js')
+const config = require('./config.js');
+const table = require('easy-table');
 
 
 // Configure logger settings
@@ -34,6 +35,9 @@ bot.on('ready', function (evt) {
 
 let clearing = false;
 bot.on('message', function (user, userID, channelID, message, evt) {
+    if (evt.d.guild_id && !config.channels.includes(channelID)) {
+        return;
+    }
     // Bot will listen for messages that will start with `!`
     if (message.substring(0, 1) == '!') {
         functions.log(con, user, userID, channelID, message, evt, config.timezone);
@@ -52,25 +56,44 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                 });
                 break;
             // adding a player
+            case 'join':
             case 'enroll':
                 clearing = false;
                 functions.enroll(bot, con, user, userID, channelID, message, evt);
                 break;
             // show stats
+            case 'standings':
+            case 'leaderboard':
             case 'stats':
                 clearing = false;
                 functions.stats(bot, con, channelID);
                 break;
 
+            case 'week':
+            case 'weekly':
+            case 'weeklystats':
             case 'weeklyStats':
                 clearing = false;
-                functions.weeklyStats(bot, con, channelID);
+                functions.weeklyStats(bot, con, channelID, args[0]);
                 break;
 
+            case 'playedwith':
+            case 'playedWith':
+            case 'alreadyPlayed':
+            case 'alreadyplayed':
+            case 'played':
+                clearing = false;
+                functions.playedWith(bot, con, user, userID, channelID);
+                break;
+
+            case 'addgame':
+            case 'game':
+            case 'addGame':
             case 'result':
                 clearing = false;
                 if (args[0]) {
-                    let opponent = args[0].slice(3, -1);
+                    let start = args[0].search(/\d/);
+                    let opponent = args[0].slice(start, -1);
                     if (opponent) {
                         functions.addResult(bot, con, user, userID, channelID, opponent, args[1], evt, config.timezone);
                     }
@@ -94,7 +117,8 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                 clearing = false;
                 if (config.mods.includes(userID)) {
                     if (args[0]) {
-                        let deleteUserId = args[0].slice(3, -1);
+                        let start = args[0].search(/\d/);
+                        let deleteUserId = args[0].slice(start, -1);
                         functions.removePlayer(con, bot, channelID, deleteUserId);
                     }
                     else {
@@ -151,6 +175,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
 
 
             // roll a pokemon
+            case 'start':
             case 'roll':
                 clearing = false;
                 if (config.mods.includes(userID)) {
@@ -169,6 +194,34 @@ bot.on('message', function (user, userID, channelID, message, evt) {
             case 'choose3':
                 clearing = false;
                 functions.choosePokemon(bot, con, user, userID, 3);
+                break;
+
+
+
+
+            case 'help':
+                clearing = false;
+                let data = [
+                    { command: '!join/!enroll', function: 'Join the league.' },
+                    { command: '!stats', function: 'Check the stats of the whole league.' },
+                    { command: '!weekly', function: 'Check the stats of a matchweek.' },
+                    { command: '!played', function: 'Check against whom you have played this week.' },
+                    { command: '!game/!result', function: 'Add a game. Use empty command for more help.' },
+                    { command: '!chooseX', function: 'Used for choosing a pokemon at the start of a matchweek.' }
+                ];
+                let msg = `Available commands:\n`;
+                msg += `\`\`\`${table.print(data)}\`\`\``;
+                bot.sendMessage({
+                    to: channelID,
+                    message: msg
+                });
+                break;
+
+            default:
+                bot.sendMessage({
+                    to: channelID,
+                    message: `Unknown command, use !help.`
+                });
                 break;
         }
     }
