@@ -373,7 +373,7 @@ function setChoices(players, results) {
     let i = 0;
     for (r of results) {
         let p = players.find(p => p.userId === r.userId);
-        if (i <= 1 || checkIfTie(r, results[1]) || i === results.length - 1) {
+        if (i <= 1 || checkIfTie(r, results[1]) || i === results.length - 1 || checkIfTie(r, results.slice(-1)[0])) {
             p.numberOfChoices = 3;
         }
         else {
