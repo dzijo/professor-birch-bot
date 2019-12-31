@@ -211,23 +211,34 @@ module.exports = {
                         let sql = `SELECT * FROM players;`;
                         con.query(sql, function (err, results, fields) {
                             let n = results.length;
-                            let sql = `SELECT * FROM records WHERE matchweek = ${matchweek};`;
+                            let sql = `SELECT * FROM records WHERE matchweek = ${matchweek};
+                            SELECT * FROM currentpokemon`;
                             con.query(sql, function (err, results, fields) {
                                 if (err) throw err;
+                                bot.sendMessage({
+                                    to: channelID,
+                                    message: `Result successfully recorded, ${user}.`
+                                });
                                 let goal = (n * (n - 1)) / 2;
-                                if (goal < results.length) {
+                                if (goal < results[0].length) {
                                     bot.sendMessage({
                                         to: channelID,
                                         message: `Someone made a big booboo.`
                                     });
                                 }
-                                else if (goal === results.length) {
+                                else if (goal === results[0].length) {
                                     let sql = `UPDATE matchweeks SET endTime = '${date}' WHERE matchweek = ${matchweek};`;
                                     con.query(sql, function (err, result, fields) {
                                         if (err) throw err;
                                         bot.sendMessage({
                                             to: channelID,
                                             message: `Congrats! That was the last game of this matchweek. Please notify an admin to begin the next matchweek.`
+                                        });
+                                        let message = `Currently owned pokemon (without evolutions):\n`;
+                                        message += `\`\`\`${table.print(results[1])}\`\`\``
+                                        bot.sendMessage({
+                                            to: channelID,
+                                            message: message
                                         });
                                     });
                                 }
