@@ -253,8 +253,7 @@ module.exports = {
     rollPokemon: function (bot, con, channelID, evt, timezone) {
         let sql =
             `SELECT userId FROM players;
-        SELECT * FROM matchweeks ORDER BY startTime DESC LIMIT 1;
-        DELETE FROM choices;`;
+        SELECT * FROM matchweeks ORDER BY startTime DESC LIMIT 1;`;
         con.query(sql, function (err, results, fields) {
             if (err) throw err;
             let res = results[1];
@@ -276,7 +275,8 @@ module.exports = {
             let date = moment.tz(evt.d.timestamp, timezone).format('YYYY-MM-DD HH:mm:ss');
             let sql =
                 `SELECT pokemon FROM pokemon WHERE ownerId IS NULL;
-            INSERT INTO matchweeks (matchweek, startTime) VALUES (${matchweek}, '${date}');`;
+            INSERT INTO matchweeks (matchweek, startTime) VALUES (${matchweek}, '${date}');
+            DELETE FROM choices;`;
             con.query(sql, function (err, results, fields) {
                 if (err) throw err;
                 let pokemon = shuffle(results[0]);
