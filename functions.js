@@ -21,7 +21,7 @@ module.exports = {
             if (results[0]) {
                 bot.sendMessage({
                     to: channelID,
-                    message: `You are already in the league, ${user}.`
+                    message: `You are already in the league, <@${userID}>.`
                 });
                 return;
             }
@@ -36,7 +36,7 @@ module.exports = {
                 }
                 bot.sendMessage({
                     to: channelID,
-                    message: `Congrats, ${user}, you have successfully enrolled in the Pokémon draft league.`
+                    message: `Congrats, <@${userID}>, you have successfully enrolled in the Pokémon draft league.`
                 })
             });
         });
@@ -115,10 +115,10 @@ module.exports = {
             con.query(sql, function (err, results, fields) {
                 let message;
                 if (!results[0]) {
-                    message = `You haven't played against anyone this matchweek, ${user}.`
+                    message = `You haven't played against anyone this matchweek, <@${userID}>.`
                 }
                 else {
-                    message = `${user}, this matchweek you have played against: `;
+                    message = `<@${userID}>, this matchweek you have played against: `;
                     for (r of results) {
                         message += `${r.opponent}, `;
                     }
@@ -136,14 +136,14 @@ module.exports = {
         if (userID === opponent) {
             bot.sendMessage({
                 to: channelID,
-                message: `Can't play against yourself, ${user}.`
+                message: `Can't play against yourself, <@${userID}>.`
             });
             return;
         }
         if (!result) {
             bot.sendMessage({
                 to: channelID,
-                message: `Please enter the score, ${user}.`
+                message: `Please enter the score, <@${userID}>.`
             });
             return;
         }
@@ -152,7 +152,7 @@ module.exports = {
         if (isNaN(score1) || isNaN(score2) || (score1 > 6 || score2 > 6) || (score1 !== 0 && score2 !== 0) || (score1 === 0 && score2 === 0)) {
             bot.sendMessage({
                 to: channelID,
-                message: `Please enter the score correctly, ${user}. <player1score>-<player2score>`
+                message: `Please enter the score correctly, <@${userID}>. <player1score>-<player2score>`
             });
             return;
         }
@@ -162,7 +162,7 @@ module.exports = {
             if (!results[1]) {
                 bot.sendMessage({
                     to: channelID,
-                    message: `You have to both be in the league and tag your opponent correctly if you haven't, ${user}. Use !result for help.`
+                    message: `You have to both be in the league and tag your opponent correctly if you haven't, <@${userID}>. Use !result for help.`
                 });
                 return;
             }
@@ -173,7 +173,7 @@ module.exports = {
                 if (results[0].endTime) {
                     bot.sendMessage({
                         to: channelID,
-                        message: `The matchweek is over, ${user}. Notify an admin to get the next one going.`
+                        message: `The matchweek is over, <@${userID}>. Notify an admin to get the next one going.`
                     });
                     return;
                 }
@@ -184,7 +184,7 @@ module.exports = {
                     if (results[0]) {
                         bot.sendMessage({
                             to: channelID,
-                            message: `You two have already played, ${user}.`
+                            message: `You two have already played, <@${userID}>.`
                         });
                         return;
                     }
@@ -217,7 +217,7 @@ module.exports = {
                                 if (err) throw err;
                                 bot.sendMessage({
                                     to: channelID,
-                                    message: `Result successfully recorded, ${user}.`
+                                    message: `Result successfully recorded, <@${userID}>.`
                                 });
                                 let goal = (n * (n - 1)) / 2;
                                 if (goal < results[0].length) {
@@ -304,7 +304,7 @@ module.exports = {
             if (!results[0]) {
                 bot.sendMessage({
                     to: userID,
-                    message: `You can't choose right now, ${user}.`
+                    message: `You can't choose right now, <@${userID}>.`
                 });
                 return;
             }
@@ -314,12 +314,57 @@ module.exports = {
                 if (err) throw err;
                 bot.sendMessage({
                     to: userID,
-                    message: `Congrats, ${user}, you have chosen ${pokemon} to be your partner! Good luck!`
+                    message: `Congrats, <@${userID}>, you have chosen ${pokemon} to be your partner! Good luck!`
                 });
                 let sql = `DELETE FROM choices WHERE userId = '${userID}';`;
                 con.query(sql, function (err, results, fields) {
                     if (err) throw err;
                 })
+            });
+        });
+    },
+
+    tradePokemon: function (bot, con, user, userID, channelID, tradee, pokemon1, pokemon2) {
+        if (userID === tradee) {
+            bot.sendMessage({
+                to: channelID,
+                message: `Can't trade with yourself, <@${userID}>.`
+            });
+            return;
+        }
+        if (!tradee || !pokemon1 || !pokemon2) {
+            bot.sendMessage({
+                to: channelID,
+                message: `Please enter all the info, <@${userID}>. !trade @<tradingpartner> <yourPokemon> <theirPokemon>`
+            });
+            return;
+        }
+        let sql = `SELECT * FROM pokemon WHERE ownerId = '${userID}' AND pokemon = '${pokemon1}';
+        SELECT * FROM pokemon WHERE ownerId = '${tradee}' AND pokemon = '${pokemon2}';`
+        con.query(sql, function (err, results, fields) {
+            if (err) throw err;
+            if (!results[0][0]) {
+                bot.sendMessage({
+                    to: channelID,
+                    message: `You don't have that pokemon, <@${userID}>.`
+                });
+                return;
+            }
+            if (!results[1][0]) {
+                bot.sendMessage({
+                    to: channelID,
+                    message: `<@${tradee}> doesn't have that pokemon, <@${userID}>.`
+                });
+                return;
+            }
+            let sql = `UPDATE pokemon SET ownerID = '${tradee}' WHERE pokemon = '${pokemon1}';
+            UPDATE pokemon SET ownerID = '${userID}' WHERE pokemon = '${pokemon2}';`
+            con.query(sql, function (err, results, fields) {
+                if (err) throw err;
+                bot.sendMessage({
+                    to: channelID,
+                    message: `You have successfully traded your ${pokemon1} for <@${tradee}>'s ${pokemon2}, <@${userID}>.`
+                });
             });
         });
     },

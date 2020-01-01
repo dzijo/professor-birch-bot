@@ -100,7 +100,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                     else {
                         bot.sendMessage({
                             to: channelID,
-                            message: `Please tag your opponent, ${user}. Use !result for help.`
+                            message: `Please tag your opponent, <@${userID}>. Use !result for help.`
                         });
                     }
                 }
@@ -112,6 +112,22 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                 }
                 break;
 
+            case 'trade':
+                clearing = false;
+                if (args[0]) {
+                    let start = args[0].search(/\d/);
+                    let tradee = args[0].slice(start, -1);
+                    if (tradee) {
+                        functions.tradePokemon(bot, con, user, userID, channelID, tradee, args[1], args[2]);
+                    }
+                    else {
+                        bot.sendMessage({
+                            to: channelID,
+                            message: `Please tag your trading partner, <@${userID}>.`
+                        });
+                    }
+                }
+                break;
 
             case 'delete':
                 clearing = false;
@@ -124,14 +140,14 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                     else {
                         bot.sendMessage({
                             to: channelID,
-                            message: `Tag a user you want to delete, ${user}.`
+                            message: `Tag a user you want to delete, <@${userID}>.`
                         });
                     }
                 }
                 else {
                     bot.sendMessage({
                         to: channelID,
-                        message: `You can't do that, ${user}.`
+                        message: `You can't do that, <@${userID}>.`
                     });
                 }
                 break;
@@ -148,7 +164,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                 else {
                     bot.sendMessage({
                         to: channelID,
-                        message: `You can't do that, ${user}.`
+                        message: `You can't do that, <@${userID}>.`
                     });
                 }
                 break;
