@@ -156,13 +156,21 @@ module.exports = {
             });
             return;
         }
-        let sql = `SELECT * FROM players WHERE userId = '${userID}' OR userId = '${opponent}';`
+        let sql = `SELECT * FROM players WHERE userId = '${userID}' OR userId = '${opponent}';
+        SELECT * FROM choices WHERE userId = '${userID}' OR userId = '${opponent};'`
         con.query(sql, function (err, results, fields) {
             if (err) throw err;
-            if (!results[1]) {
+            if (!results[0][1]) {
                 bot.sendMessage({
                     to: channelID,
                     message: `You have to both be in the league and tag your opponent correctly if you haven't, <@${userID}>. Use !result for help.`
+                });
+                return;
+            }
+            if (results[1][1]) {
+                bot.sendMessage({
+                    to: channelID,
+                    message: `You have to both choose a pokemon to battle, <@${userID}>.`
                 });
                 return;
             }
