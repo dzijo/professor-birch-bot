@@ -130,7 +130,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                 else {
                     bot.sendMessage({
                         to: channelID,
-                        message: `Correct usage of the command:\n!trade @<partner> <your pokemon>-<partner's pokemon>.\nMake sure to tag your partner.`
+                        message: `Correct usage of the command:\n!trade @<partner> <your pokemon> <partner's pokemon>.\nMake sure to tag your partner.`
                     });
                 }
                 break;
@@ -230,7 +230,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                     { command: '!played', function: 'Check against whom you have played this week.' },
                     { command: '!game/!result', function: 'Add a game. Use empty command for more help.' },
                     { command: '!chooseX', function: 'Used for choosing a pokemon at the start of a matchweek.' },
-                    { command: '!trade', function: 'Used for trading a pokemon.' }
+                    { command: '!trade', function: 'Used for trading a pokemon. Use empty command for more help.' }
                 ];
                 let msg = `Available commands:\n`;
                 msg += `\`\`\`${table.print(data)}\`\`\``;
