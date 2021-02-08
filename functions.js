@@ -43,7 +43,7 @@ module.exports = {
     },
 
     stats: function (bot, con, channelID) {
-        let sql = `SELECT userName, wins, losses, PF, PA, PF-PA AS PD FROM players ORDER BY wins DESC, PF - PA DESC, PF DESC`;
+        let sql = `SELECT userName, (wins+losses) as played, wins, losses, PF, PA, PF-PA AS PD FROM players ORDER BY wins DESC, PF - PA DESC, PF DESC`;
         con.query(sql, function (err, results, fields) {
             if (err) throw err;
             bot.sendMessage({
@@ -85,7 +85,7 @@ module.exports = {
             else {
                 matchweek = results[0].matchweek;
             }
-            let sql = `SELECT userName, wins, losses, PF, PA, PD FROM fullresultsbymatchweek WHERE matchweek = ${matchweek} ORDER BY wins DESC, PD DESC, PF DESC`;
+            let sql = `SELECT userName, (wins+losses) as played, wins, losses, PF, PA, PD FROM fullresultsbymatchweek WHERE matchweek = ${matchweek} ORDER BY wins DESC, PD DESC, PF DESC`;
             con.query(sql, function (err, results, fields) {
                 if (err) throw err;
                 let message = `Stats for matchweek ${matchweek}:\n`;
