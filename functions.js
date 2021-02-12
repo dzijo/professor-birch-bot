@@ -157,7 +157,7 @@ module.exports = {
             return;
         }
         let sql = `SELECT * FROM players WHERE userId = '${userID}' OR userId = '${opponent}';
-        SELECT * FROM choices WHERE userId = '${userID}' OR userId = '${opponent};'`
+        SELECT * FROM choices WHERE userId = '${userID}' OR userId = '${opponent}';`
         con.query(sql, function (err, results, fields) {
             if (err) throw err;
             if (!results[0][1]) {
