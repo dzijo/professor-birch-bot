@@ -318,9 +318,9 @@ module.exports = {
             }
             let message = ``;
             results.sort((a, b) => (a.choice < b.choice) ? 1 : -1)
-            for (let i = 1; i <= results.length; i++) {
+            for (let i = 0; i <= results.length; i++) {
                 let pokemon = results[i].pokemon
-                message += `Option ${i}: ${pokemon}\n`;
+                message += `Option ${i+1}: ${pokemon}\n`;
             }
             message += `Please answer with "!choose<number of option>" to choose a pokemon. E.g. !choose1`;
             bot.sendMessage({
