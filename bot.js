@@ -204,6 +204,11 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                     functions.rollPokemon(bot, con, channelID, evt, config.timezone);
                 }
                 break;
+            
+            case 'choices':
+                clearing = false;
+                functions.resendChoices(bot, con, userID);
+                break;
 
             case 'choose1':
                 clearing = false;

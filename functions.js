@@ -305,6 +305,31 @@ module.exports = {
         })
     },
 
+    resendChoices: function (bot, con, userID) {
+        let sql = `SELECT pokemon, choice FROM choices WHERE userId = ${userID};`
+        con.query(sql, function (err, results, fields) {
+            if (err) throw err;
+            if (!results[0]) {
+                bot.sendMessage({
+                    to: userID,
+                    message: `You have already chosen, <@${userID}>.`
+                });
+                return;
+            }
+            let message = ``;
+            // for (let j = 1; j <= p.numberOfChoices; j++) {
+            //     let mon = pokemon[i + j].pokemon
+            //     message += `Option ${j}: ${mon}\n`;
+            // }
+            message += `Please answer with "!choose<number of option>" to choose a pokemon. E.g. !choose1`;
+            bot.sendMessage({
+                to: userID,
+                message: results
+            });
+            return;
+        })
+    },
+
     choosePokemon: function (bot, con, user, userID, choice) {
         let sql = `SELECT pokemon FROM choices WHERE userId = '${userID}' AND choice = ${choice};`;
         con.query(sql, function (err, results, fields) {
