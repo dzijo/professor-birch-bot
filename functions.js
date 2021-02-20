@@ -324,7 +324,7 @@ module.exports = {
             message += `Please answer with "!choose<number of option>" to choose a pokemon. E.g. !choose1`;
             bot.sendMessage({
                 to: userID,
-                message: results
+                message: JSON.stringify(results)
             });
             return;
         })
