@@ -234,6 +234,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                     { command: '!weekly', function: 'Check the stats of a matchweek.' },
                     { command: '!played', function: 'Check against whom you have played this week.' },
                     { command: '!game/!result', function: 'Add a game. Use empty command for more help.' },
+                    { command: '!choices', function: 'Politely ask the professor to send you your choices for this matchweek.'},
                     { command: '!chooseX', function: 'Used for choosing a pokemon at the start of a matchweek.' },
                     { command: '!trade', function: 'Used for trading a pokemon. Use empty command for more help.' }
                 ];
