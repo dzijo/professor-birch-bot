@@ -317,7 +317,7 @@ module.exports = {
                 return;
             }
             let message = ``;
-            results.sort((a, b) => (a.choice < b.choice) ? 1 : -1)
+            results.sort((a, b) => (a.choice > b.choice) ? 1 : -1)
             for (let i = 0; i < results.length; i++) {
                 let pokemon = results[i].pokemon
                 message += `Option ${i+1}: ${pokemon}\n`;
